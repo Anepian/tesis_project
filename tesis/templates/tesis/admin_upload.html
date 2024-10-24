@@ -1,0 +1,87 @@
+{% load static %}
+{% load form_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Tesis</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom mb-4 w-100">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Tesis - Facultad de Telematica</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tesis:visitor_view_theses' %}">Vista de Visitante</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container container-custom">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Subir Nueva Tesis</h3>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="title">Título</label>
+                        {{ form.title|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="author">Autor</label>
+                        {{ form.author|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="advisor">Asesor</label>
+                        {{ form.advisor|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="co_advisor">Co-Asesor</label>
+                        {{ form.co_advisor|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="year">Año</label>
+                        {{ form.year|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="category">Categoría</label>
+                        {{ form.category|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="summary">Resumen</label>
+                        {{ form.summary|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="pdf">PDF</label>
+                        {{ form.pdf|add_class:"form-control" }}
+                    </div>
+                    <div class="form-group form-check mb-3">
+                        {{ form.visible }} <label class="form-check-label" for="visible">Visible</label>
+                    </div>
+                    <button type="submit" class="btn btn-custom">Subir</button>
+                </form>
+            </div>
+            <div class="col-md-6">
+                <h3>Tesis Existentes</h3>
+                <ul class="list-group">
+                    {% for thesis in theses %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ thesis.title }} - {{ thesis.author }}</span>
+                            <div>
+                                <a href="{% url 'tesis:admin_toggle_visibility' thesis.id %}" class="btn btn-sm {% if thesis.visible %}btn-success{% else %}btn-secondary{% endif %}">
+                                    {% if thesis.visible %}Visible{% else %}Oculto{% endif %}
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

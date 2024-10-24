@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ thesis.title }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom mb-4 w-100">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Tesis - Facultad de Telemática</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tesis:visitor_view_theses' %}">Vista de Visitante</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container container-custom">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>{{ thesis.title }}</h2>
+                <p><strong>Autor:</strong> {{ thesis.author }}</p>
+                <p><strong>Asesor:</strong> {{ thesis.advisor }}</p>
+                {% if thesis.co_advisor %}
+                <p><strong>Co-Asesor:</strong> {{ thesis.co_advisor }}</p>
+                {% endif %}
+                <p><strong>Año:</strong> {{ thesis.year }}</p>
+                <p><strong>Categoría:</strong> {{ thesis.category }}</p>
+                <p><strong>Resumen:</strong> {{ thesis.summary }}</p>
+                <a href="{{ thesis.pdf.url }}" class="btn btn-custom" target="_blank">Ver PDF Completo</a>
+                <a href="{{ thesis.pdf.url }}" class="btn btn-custom" download>Descargar PDF</a>
+            </div>
+            <div class="col-md-4">
+                <h3>Vista Previa del PDF</h3>
+                <canvas id="pdf-canvas" style="width: 100%; height: auto;"></canvas>
+            </div>
+        </div>
+    </div>
+    <br>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var url = "{{ thesis.pdf.url }}";
+            var pdfjsLib = window['pdfjs-dist/build/pdf'];
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+
+            var loadingTask = pdfjsLib.getDocument(url);
+            loadingTask.promise.then(function(pdf) {
+                console.log('PDF loaded');
+
+                // Fetch the first page
+                var pageNumber = 1;
+                pdf.getPage(pageNumber).then(function(page) {
+                    console.log('Page loaded');
+
+                    var scale = 0.8; // Adjust the scale to reduce the size
+                    var viewport = page.getViewport({ scale: scale });
+
+                    // Prepare canvas using PDF page dimensions
+                    var canvas = document.getElementById('pdf-canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    // Render PDF page into canvas context
+                    var renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    var renderTask = page.render(renderContext);
+                    renderTask.promise.then(function() {
+                        console.log('Page rendered');
+                    });
+                });
+            }, function(reason) {
+                console.error(reason);
+            });
+        });
+    </script>
+</body>
+</html>

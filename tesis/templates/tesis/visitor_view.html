@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Tesis</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+        }
+        .navbar-nav .nav-link {
+            display: flex;
+            align-items: center;
+        }
+        .filter-select {
+            max-width: 200px;
+        }
+        .thesis-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .thesis-title {
+            flex: 1;
+            margin-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .thesis-author {
+            font-size: 0.9em;
+            color: #6c757d;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        .list-group {
+            padding-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom mb-4 w-100">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'tesis:home' %}">Tesis - Facultad de Telemática</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="nav-link">Bienvenido, {{ user.username }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'tesis:upload_thesis' %}">Modificar Tesis</a>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}" class="form-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link" style="padding: 0;">Cerrar Sesión</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Iniciar Sesión</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Tesis Disponibles</h1>
+        <form method="get" action="{% url 'tesis:visitor_view_theses' %}">
+            <div class="input-group mb-3">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por título, autor, asesor, categoría..." value="{{ request.GET.q }}">
+                <select name="category" class="form-control filter-select">
+                    <option value="all" {% if not selected_category or selected_category == 'all' %}selected{% endif %}>Todas las Categorías</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
+                <select name="year" class="form-control filter-select">
+                    <option value="all" {% if not selected_year or selected_year == 'all' %}selected{% endif %}>Todos los Años</option>
+                    {% for year in years %}
+                        <option value="{{ year }}" {% if selected_year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                </div>
+            </div>
+        </form>
+        <p>Se encontraron {{ theses|length }} tesis registradas.</p>
+        <ul class="list-group">
+            {% if theses %}
+                {% for thesis in theses %}
+                    <li class="list-group-item thesis-item">
+                        <a href="{% url 'tesis:thesis_detail' thesis.id %}" class="thesis-title">{{ thesis.title }}</a>
+                        <span class="thesis-author">{{ thesis.author }}</span>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">No hay tesis disponibles.</li>
+            {% endif %}
+        </ul>
+    </div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrarse</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container-custom {
+            max-width: 500px;
+            margin-top: 50px;
+        }
+        .alert-custom {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container container-custom">
+        <h2>Registro (Solo para Personal Administrativo)</h2>
+        {% if form.errors %}
+            <div class="alert alert-danger alert-custom" role="alert">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="form-group">
+                <label for="security_key">Clave de Seguridad</label>
+                <input type="password" name="security_key" class="form-control" id="security_key" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Registrarse</button>
+        </form>
+        <hr>
+        <a href="{% url 'login' %}" class="btn btn-secondary">Iniciar Sesión</a>
+    </div>
+</body>
+</html>
